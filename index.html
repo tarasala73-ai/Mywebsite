@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Sign-in & Inbox UI Flow</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .step-container {
+            display: none;
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 32px;
+            border-radius: 28px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin-bottom: 16px;
+        }
+        .g-blue { color: #4285F4; }
+        .g-red { color: #EA4335; }
+        .g-yellow { color: #FBBC05; }
+        .g-green { color: #34A853; }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #1f1f1f;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #444746;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .user-chip {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #747775;
+            border-radius: 20px;
+            padding: 4px 12px 4px 4px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #1f1f1f;
+        }
+        .user-chip span.avatar {
+            background: #0b57d0;
+            color: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-size: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #444746;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #747775;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border: 2px solid #0b57d0;
+            padding: 13px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #1f1f1f;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            width: 100%;
+            background-color: #0b57d0;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 12px;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #0842a0;
+        }
+
+        .bottom-link {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .bottom-link a {
+            color: #0b57d0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .bottom-link a:hover {
+            text-decoration: underline;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #34A853;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 10px auto 20px auto;
+        }
+
+        .gmail-app {
+            max-width: 520px;
+            padding: 0;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .gmail-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8fafd;
+        }
+
+        .gmail-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            color: #444746;
+            font-weight: 500;
+        }
+
+        .gmail-m-icon {
+            color: #EA4335;
+            font-weight: bold;
+            font-size: 22px;
+        }
+
+        .gmail-body {
+            display: flex;
+            min-height: 280px;
+        }
+
+        .gmail-sidebar {
+            width: 150px;
+            background-color: #f8fafd;
+            padding: 12px 8px;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .sidebar-item {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #444746;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .sidebar-item.active {
+            background-color: #d3e3fd;
+            color: #041e49;
+            font-weight: 600;
+        }
+
+        .gmail-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .big-m-logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #EA4335;
+            margin-bottom: 12px;
+        }
+    </style>
+<style>
+body {
+  font-family: system-ui, Arial, sans-serif;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+.card {
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  text-align: center;
+}
+button {
+  background: #2563eb;
+  color: #fff;
+  border: 0;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+
+    <!-- ধাপ ১: ফোন নম্বর দিন (ফাঁকা বক্স) -->
+    <div id="step-1" class="step-container active">
+        <div class="logo">
+            <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+        </div>
+        <h1>Sign in</h1>
+        <p class="subtitle">to continue to Gmail</p>
+        
+        <div class="input-group">
+            <label for="phoneInput">Phone number</label>
+            <input type="text" id="phoneInput" placeholder="Phone number">
+        </div>
+        
+        <button type="button" class="action-btn" onclick="goToStep(2)">Next</button>
+        
+        <div class="bottom-link">
+            <a href="#">Forgot email?</a>
+        </div>
+    </div>
+
+    <!-- ধাপ ২: পাসওয়ার্ড দিন (ফাঁকা বক্স) -->
+    <div id="step-2" class="step-container">
+        <div class="logo">
+            <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+        </div>
+        <h1>Welcome back</h1>
+        <p class="subtitle" style="margin-bottom: 12px;">to continue to Gmail</p>
+        
+        <div class="user-chip">
+            <span class="avatar">U</span> <span id="displayAccount">user@gmail.com</span> &nbsp;▾
+        </div>
+        
+        <div class="input-group">
+            <label for="passInput">Enter your password</label>
+            <input type="password" id="passInput" placeholder="Enter your password">
+        </div>
+        
+        <div class="checkbox-group">
+            <input type="checkbox" id="showPassCheck" onclick="togglePassword()">
+            <label for="showPassCheck">Show password</label>
+        </div>
+        
+        <button type="button" class="action-btn" onclick="goToStep(3)">Next</button>
+        
+        <div class="bottom-link">
+            <a href="#">Forgot password?</a>
+        </div>
+    </div>
+
+    <!-- ধাপ ৩: OTP যাচাই করুন -->
+    <div id="step-3" class="step-container">
+        <div class="logo">
+            <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+        </div>
+        <h1>Verify it's you</h1>
+        <p class="subtitle">Enter the code sent to <br><strong id="otpPhoneDisplay">your number</strong></p>
+        
+        <div class="input-group">
+            <input type="text" id="otpInput" placeholder="Enter code">
+        </div>
+
+        <div class="bottom-link" style="margin-bottom: 20px; color: #444746;">
+            Didn't get the code? <a href="#">Resend</a>
+        </div>
+        
+        <button type="button" class="action-btn" onclick="goToStep(4)">Verify</button>
+    </div>
+
+    <!-- ধাপ ৪: সফলভাবে লগইন -->
+    <div id="step-4" class="step-container">
+        <div class="logo">
+            <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+        </div>
+        
+        <div class="success-icon">✓</div>
+        
+        <h1>Welcome to Google</h1>
+        <p class="subtitle">You're now signed in to Gmail</p>
+        
+        <button type="button" class="action-btn" onclick="goToStep(5)">Continue</button>
+    </div>
+
+    <!-- ধাপ ৫: এখন Gmail ব্যবহার করুন -->
+    <div id="step-5" class="step-container gmail-app">
+        <div class="gmail-topbar">
+            <div class="gmail-brand">
+                <span>☰</span>
+                <span class="gmail-m-icon">M</span>
+                <span>Gmail</span>
+            </div>
+            <span style="color: #444746; font-size: 18px;">🔍</span>
+        </div>
+
+        <div class="gmail-body">
+            <div class="gmail-sidebar">
+                <div class="sidebar-item active">📥 Inbox</div>
+                <div class="sidebar-item">☆ Starred</div>
+                <div class="sidebar-item">🕒 Snoozed</div>
+                <div class="sidebar-item">➤ Sent</div>
+                <div class="sidebar-item">📄 Drafts</div>
+                <div class="sidebar-item">⌄ More</div>
+            </div>
+
+            <div class="gmail-main">
+                <div class="big-m-logo">M</div>
+                <h2 style="font-size: 20px; color: #1f1f1f; margin-bottom: 6px;">Welcome to Gmail!</h2>
+                <p style="font-size: 14px; color: #444746; margin-bottom: 20px;">Your inbox is ready.</p>
+                <button type="button" class="action-btn" style="padding: 8px 20px; width: auto;" onclick="resetAll()">Back to Start</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToStep(stepNumber) {
+            if (stepNumber === 2) {
+                const phoneVal = document.getElementById('phoneInput').value.trim();
+                if (phoneVal !== "") {
+                    document.getElementById('displayAccount').innerText = phoneVal;
+                    document.getElementById('otpPhoneDisplay').innerText = phoneVal;
+                } else {
+                    document.getElementById('displayAccount').innerText = "user@gmail.com";
+                    document.getElementById('otpPhoneDisplay').innerText = "your phone";
+                }
+            }
+
+            const allSteps = document.querySelectorAll('.step-container');
+            allSteps.forEach(step => step.classList.remove('active'));
+
+            document.getElementById('step-' + stepNumber).classList.add('active');
+        }
+
+        function togglePassword() {
+            const passField = document.getElementById('passInput');
+            passField.type = (passField.type === "password") ? "text" : "password";
+        }
+
+        function resetAll() {
+            document.getElementById('phoneInput').value = "";
+            document.getElementById('passInput').value = "";
+            document.getElementById('otpInput').value = "";
+            goToStep(1);
+        }
+    </script>
+<script>
+let clicks = 0;
+document.getElementById('btn').addEventListener('click', () => {
+  clicks++;
+  document.getElementById('out').textContent = 'Clicked ' + clicks + ' time(s)';
+  console.log('Button clicked', clicks);
+});
+
+</script>
+</body>
+</html>
